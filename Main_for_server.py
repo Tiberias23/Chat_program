@@ -25,6 +25,16 @@ def handle_client(client_socket, addr):
 
             print(f"[{username}] {msg}")
 
+            # Logout-Befehl: Wenn der Benutzer "!logout" eingibt, wird er abgemeldet
+            if msg.lower() == "!logout":
+                client_socket.send("Du hast dich erfolgreich abgemeldet.".encode())
+                print(f"[LOGOUT] {username} hat sich abgemeldet.")
+                # Nachricht an alle Clients senden
+                for client in clients:
+                    if client != client_socket:
+                        client.send(f"{username} hat sich abgemeldet.".encode())
+                break
+
             # Private Nachricht: Prüfen, ob die Nachricht mit @Benutzername beginnt
             if msg.startswith("@"):
                 target_username = msg.split(" ")[0][1:]  # Benutzername nach @
@@ -35,6 +45,7 @@ def handle_client(client_socket, addr):
                     if name == target_username:
                         client.send(f"[Privat von {username}]: {private_msg}".encode())
                         break
+
             else:
                 # Nachricht an alle anderen Clients weiterleiten
                 for client in clients:
