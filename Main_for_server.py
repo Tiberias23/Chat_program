@@ -27,8 +27,9 @@ def handle_client(client_socket, addr):
 
             # Logout-Befehl: Wenn der Benutzer "!logout" eingibt, wird er abgemeldet
             if msg.lower() == "!logout":
-                client_socket.send("Du hast dich erfolgreich abgemeldet.".encode())
+                client_socket.send("[Server] Du hast dich erfolgreich abgemeldet.".encode())
                 print(f"[LOGOUT] {username} hat sich abgemeldet.")
+
                 # Nachricht an alle Clients senden
                 for client in clients:
                     if client != client_socket:
@@ -45,6 +46,10 @@ def handle_client(client_socket, addr):
                     if name == target_username:
                         client.send(f"[Privat von {username}]: {private_msg}".encode())
                         break
+
+            # Error Nachricht: Wenn ein Client einen Fehler hat, wird versucht eine Error Nachricht and den Server
+            if msg.startswith("[Client Error]"):
+                print(f"{msg} Error From {username}")
 
             else:
                 # Nachricht an alle anderen Clients weiterleiten
@@ -64,7 +69,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(("0.0.0.0", 12345))
 server.listen(5)
 
-print("[SERVER GESTARTET] Wartet auf Verbindungen...")
+print("[SERVER] Wartet auf Verbindungen...")
 
 while True:
     client_socket, addr = server.accept()
