@@ -62,12 +62,12 @@ def handle_client(client_socket, addr):
 
     print(f"[ABMELDUNG] {username} hat die Verbindung getrennt.")
     del clients[client_socket]  # Benutzer entfernen
-    client_socket.close()
+    client_socket.close() # schließt die Verbindung zum Client
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(("0.0.0.0", 12345))
-server.listen(5)
+server.listen(5) # Basically die Warteschlange für anfragen
 
 print("[SERVER] Wartet auf Verbindungen...")
 

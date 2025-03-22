@@ -76,4 +76,4 @@ while True:
         break # Beende die Eingabe-Schleife
 
     else:
-        client.send(msg.encode())  # Nachricht an Server senden
+        client.send(msg.encode()) # Nachricht an Server senden
