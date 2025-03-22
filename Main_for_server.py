@@ -8,7 +8,7 @@ def handle_client(client_socket, addr):
     print(f"[NEUE VERBINDUNG] {addr} verbunden.")
 
     # Benutzername vom Client empfangen
-    client_socket.send("Gib deinen Benutzernamen ein\n".encode())
+    client_socket.send("Gib deinen Benutzernamen ein:".encode())
     username = client_socket.recv(1024).decode().strip()
 
     clients[client_socket] = username
@@ -25,10 +25,21 @@ def handle_client(client_socket, addr):
 
             print(f"[{username}] {msg}")
 
-            # Nachricht an alle anderen Clients weiterleiten
-            for client in clients:
-                if client != client_socket:
-                    client.send(f"{username}: {msg}".encode())
+            # Private Nachricht: Prüfen, ob die Nachricht mit @Benutzername beginnt
+            if msg.startswith("@"):
+                target_username = msg.split(" ")[0][1:]  # Benutzername nach @
+                private_msg = " ".join(msg.split(" ")[1:])  # Der Text der Nachricht
+
+                # Nachricht nur an den angegebenen Benutzer senden
+                for client, name in clients.items():
+                    if name == target_username:
+                        client.send(f"[Privat von {username}]: {private_msg}".encode())
+                        break
+            else:
+                # Nachricht an alle anderen Clients weiterleiten
+                for client in clients:
+                    if client != client_socket:
+                        client.send(f"{username}: {msg}".encode())
 
         except:
             break
