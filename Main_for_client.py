@@ -10,6 +10,9 @@ Fehler_Farbe = Fore.RED
 Eigene_Nachrichten_Farbe = Fore.GREEN
 Andere_Nachrichten_Farbe = Fore.BLUE
 
+Server_Ip = "127.0.0.1"
+Server_Port = 12345
+
 
 def receive_messages(client_socket, username):
     while True:
@@ -19,7 +22,7 @@ def receive_messages(client_socket, username):
                 sys.stdout.write("\r" + " " * 50 + "\r")
 
                 # Eigene Nachrichten grün anzeigen, andere blau
-                if msg.startswith(f"[Privat von {username}]:"):
+                if msg.startswith(f"[Privat von "):
                     print(Fore.MAGENTA + msg)  # Private Nachrichten in Magenta
 
                 elif msg.startswith(username + ":"):
@@ -37,7 +40,7 @@ def receive_messages(client_socket, username):
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(("127.0.0.1", 12345))  # Verbindung zum Server
+client.connect((Server_Ip, Server_Port))  # Verbindung zum Server
 
 # Nachricht vom Server empfangen (Benutzernamen eingeben)
 print(client.recv(1024).decode(), end=" ")
