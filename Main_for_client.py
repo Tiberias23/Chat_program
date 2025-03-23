@@ -13,41 +13,45 @@ Eigene_Nachrichten_Farbe = Fore.GREEN
 Private_Nachrichten_Farbe = Fore.MAGENTA
 Andere_Nachrichten_Farbe = Fore.CYAN
 
+# This has to be the same as the stuff in Server.Binde() in the Server.py
 Server_Ip = "127.0.0.1"
 Server_Port = 12345
 
 def receive_messages(client_socket, username):
-                while True:
-                    try:
-                        msg = client_socket.recv(1024).decode()
-                        if msg:
-                            # Löscht die aktuelle Zeile und sorgt dafür, dass der Cursor zurückgesetzt wird
-                            sys.stdout.write("\r" + " " * 50 + "\r")  # Zeile löschen
-                            sys.stdout.flush()
+    while True:
+        try:
+            msg = client_socket.recv(1024).decode()
+            if msg:
+                if msg.startswith("Benutzername bereits vergeben. "):
+                    continue
 
-                            # Eigene Nachrichten grün anzeigen, private Nachrichten in Magenta, andere blau
-                            if msg.startswith(f"[Privat von "):
-                                print(Private_Nachrichten_Farbe + msg)  # Private Nachricht in Magenta
+                # Löscht die aktuelle Zeile und sorgt dafür, dass der Cursor zurückgesetzt wird
+                sys.stdout.write("\r" + " " * 50 + "\r")  # Zeile löschen
+                sys.stdout.flush()
 
-                            elif msg.startswith(f"[Server"):
-                                print(Server_Farbe + msg)  # Server Nachrichten
+                if msg.startswith(f"[Privat "):
+                    print(Private_Nachrichten_Farbe + msg)  # Private Nachricht in Magenta
 
-                            elif msg.startswith(username + ":"):
-                                print(Eigene_Nachrichten_Farbe + msg)  # Eigene Nachrichten in Grün
-                            else:
-                                print(Andere_Nachrichten_Farbe + msg)  # Nachrichten von anderen in Blau
+                elif msg.startswith(f"[Server"):
+                    print(Server_Farbe + msg)  # Server Nachrichten
 
-                            if "[Server] Du hast dich erfolgreich abgemeldet." in msg:
-                                break  # Beende die Schleife bei Logout-Nachricht
+                elif msg.startswith(username + ":"):
+                    print(Eigene_Nachrichten_Farbe + msg)  # Eigene Nachrichten in Grün
 
-                            sys.stdout.write("> ")  # Eingabezeile neu anzeigen
-                            sys.stdout.flush()
+                else:
+                    print(Andere_Nachrichten_Farbe + msg)  # Nachrichten von anderen in Blau
 
-                    except Exception as e:
-                        print(Fehler_Farbe + "[VERBINDUNG ZUM SERVER VERLOREN]")
-                        client_socket.send(f"[Client Error] Client had error: {e}")
-                        client_socket.close()
-                        break
+                if "[Server] Du hast dich erfolgreich abgemeldet." in msg:
+                    break  # Beende die Schleife bei Logout-Nachricht
+
+                sys.stdout.write("> ")  # Eingabezeile neu anzeigen
+                sys.stdout.flush()
+
+        except Exception as e:
+            print(Fehler_Farbe + "[VERBINDUNG ZUM SERVER VERLOREN]")
+            client_socket.send(f"[Client Error] Client had error: {e}")
+            client_socket.close()
+            break
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

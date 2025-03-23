@@ -11,6 +11,14 @@ def handle_client(client_socket, addr):
     client_socket.send("Gib deinen Benutzernamen ein:".encode())
     username = client_socket.recv(1024).decode().strip()
 
+    if username in clients.values():
+        client_socket.send("Benutzername bereits vergeben. Bitte einen anderen Benutzernamen wählen:".encode())
+        username = client_socket.recv(1024).decode().strip()
+        if username in clients.values():
+            client_socket.send("Benutzername bereits vergeben. Verbindung wird geschlossen.".encode())
+            client_socket.close()
+            return
+
     clients[client_socket] = username
     print(f"[LOGIN] {username} hat sich verbunden.")
 
@@ -23,8 +31,6 @@ def handle_client(client_socket, addr):
             if not msg:
                 break
 
-            print(f"[{username}] {msg}")
-
             # Logout-Befehl: Wenn der Benutzer "!logout" eingibt, wird er abgemeldet
             if msg.lower() == "!logout":
                 client_socket.send("[Server] Du hast dich erfolgreich abgemeldet.".encode())
@@ -33,7 +39,13 @@ def handle_client(client_socket, addr):
                 # Nachricht an alle Clients senden
                 for client in clients:
                     if client != client_socket:
-                        client.send(f"{username} hat sich abgemeldet.".encode())
+                        client.send(f"[Server] {username} hat sich abgemeldet.".encode())
+                break
+
+            # Wer ist online
+            if msg.lower() == "/online":
+                online_users = ", ".join(clients.values())
+                client_socket.send(f"Online Benutzer: {online_users}".encode())
                 break
 
             # Private Nachricht: Prüfen, ob die Nachricht mit @Benutzername beginnt
@@ -46,12 +58,14 @@ def handle_client(client_socket, addr):
                     if name == target_username:
                         client.send(f"[Privat von {username}]: {private_msg}".encode())
                         break
+                continue
 
-            # Error Nachricht: Wenn ein Client einen Fehler hat, wird versucht eine Error Nachricht and den Server
+            # Error Nachricht: Wenn ein Client einen Fehler hat, wird versucht eine Error Nachricht and den Server zu schicken
             if msg.startswith("[Client Error]"):
                 print(f"{msg} Error From {username}")
 
             else:
+                print(f"[{username}] {msg}")
                 # Nachricht an alle anderen Clients weiterleiten
                 for client in clients:
                     if client != client_socket:
