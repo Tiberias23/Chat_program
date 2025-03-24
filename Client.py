@@ -43,16 +43,17 @@ def receive_messages(client_socket, username):
                 else:
                     print(Other_Messages_Color + msg_decoded)  # Nachrichten von anderen in Blau
 
-                if "[Server] You have successfully logged out." in msg_decoded:
-                    break  # Schleife bei Abmelde-Nachricht beenden
-
-                sys.stdout.write("> ")  # Eingabezeile erneut anzeigen
-                sys.stdout.flush()
+                if "[Server] You have successfully logged out." != msg_decoded:
+                    sys.stdout.write("2> ")  # Eingabezeile erneut anzeigen
+                    sys.stdout.flush()
+                else:
+                    break  # Schleife beenden, wenn der Client abgemeldet wurde
 
         except Exception as e:
             print(Error_Color + "[CONNECTION TO SERVER LOST]")  # Verbindungsverlust anzeigen
             client_socket.close()  # Socket schließen
             break
+    return
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((Server_Ip, Server_Port))  # Connect to server
@@ -71,13 +72,15 @@ thread.start()
 
 # Send messages
 while True:
-    msg = input("> ")
+    msg = input("1> ")
 
-    if msg.lower() == "!logout":
+    if msg.lower() == "/logout":
         client.send(base64.b64encode(msg.encode()))  # Abmeldung an den Server senden
-        time.sleep(1)
-        client.close()
         break  # Eingabeschleife beenden und Client schließen
 
     else:
         client.send(base64.b64encode(msg.encode()))  # Nachricht an den Server senden
+
+# Warten bis der Thread beendet ist
+thread.join()
+client.close()  # Client schließen
