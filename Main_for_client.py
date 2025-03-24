@@ -4,80 +4,80 @@ import threading
 import sys
 from colorama import init, Fore
 
-init(autoreset=True)  # Stellt sicher, dass Farben nach jeder Zeile zurückgesetzt werden
+init(autoreset=True)  # Ensures that colors are reset after each line
 
-# Farben für verschiedene Nachrichten änder dies so wie du willst die Bibliothek dafür ist colorama
-Server_Farbe = Fore.YELLOW
-Fehler_Farbe = Fore.RED
-Eigene_Nachrichten_Farbe = Fore.GREEN
-Private_Nachrichten_Farbe = Fore.MAGENTA
-Andere_Nachrichten_Farbe = Fore.CYAN
+# Colors for different messages, change them as desired, the library used is colorama
+Server_Color = Fore.YELLOW
+Error_Color = Fore.RED
+Own_Messages_Color = Fore.GREEN
+Private_Messages_Color = Fore.MAGENTA
+Other_Messages_Color = Fore.CYAN
 
-# This has to be the same as the stuff in Server.Binde() in the Server.py
+# This must match the settings in Server.bind() in Server.py
 Server_Ip = "127.0.0.1"
 Server_Port = 12345
 
 def receive_messages(client_socket, username):
     while True:
         try:
-            msg = client_socket.recv(1024).decode()
+            msg = client_socket.recv(1024).decode() # Receive message from server
             if msg:
-                if msg.startswith("Benutzername bereits vergeben. "):
+                if msg.startswith("Username already taken. "):
                     continue
 
-                # Löscht die aktuelle Zeile und sorgt dafür, dass der Cursor zurückgesetzt wird
-                sys.stdout.write("\r" + " " * 50 + "\r")  # Zeile löschen
+                # Clears the current line and ensures the cursor is reset
+                sys.stdout.write("\r" + " " * 50 + "\r") # Clear line
                 sys.stdout.flush()
 
-                if msg.startswith(f"[Privat "):
-                    print(Private_Nachrichten_Farbe + msg)  # Private Nachricht in Magenta
+                if msg.startswith(f"[Private "):
+                    print(Private_Messages_Color + msg) # Private message in magenta
 
                 elif msg.startswith(f"[Server"):
-                    print(Server_Farbe + msg)  # Server Nachrichten
+                    print(Server_Color + msg) # Server messages
 
                 elif msg.startswith(username + ":"):
-                    print(Eigene_Nachrichten_Farbe + msg)  # Eigene Nachrichten in Grün
+                    print(Own_Messages_Color + msg) # Own messages in green
 
                 else:
-                    print(Andere_Nachrichten_Farbe + msg)  # Nachrichten von anderen in Blau
+                    print(Other_Messages_Color + msg) # Messages from others in blue
 
-                if "[Server] Du hast dich erfolgreich abgemeldet." in msg:
-                    break  # Beende die Schleife bei Logout-Nachricht
+                if "[Server] You have successfully logged out." in msg:
+                    break # End loop on logout message
 
-                sys.stdout.write("> ")  # Eingabezeile neu anzeigen
+                sys.stdout.write("> ") # Display input line again
                 sys.stdout.flush()
 
         except Exception as e:
-            print(Fehler_Farbe + "[VERBINDUNG ZUM SERVER VERLOREN]")
-            client_socket.send(f"[Client Error] Client had error: {e}")
-            client_socket.close()
+            print(Error_Color + "[CONNECTION TO SERVER LOST]") # Display connection loss
+            client_socket.send(f"[Client Error] Client had error: {e}") # Send error to server
+            client_socket.close() # Close socket
             break
 
-
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((Server_Ip, Server_Port))  # Verbindung zum Server
+client.connect((Server_Ip, Server_Port)) # Connect to server
 
-# Nachricht vom Server empfangen (Benutzernamen eingeben)
+# Receive message from server (enter username)
 print(client.recv(1024).decode(), end=" ")
 username = input()
-client.send(username.encode())  # Benutzername an Server senden
+client.send(username.encode()) # Send username to server
 
-# Begrüßungsnachricht empfangen
-print(Server_Farbe + client.recv(1024).decode())
+# Receive welcome message
+print(Server_Color + client.recv(1024).decode())
 
-# Starte Thread für eingehende Nachrichten
+# Start thread for incoming messages
 thread = threading.Thread(target=receive_messages, args=(client, username))
 thread.start()
 
-# Nachrichten senden
+# Send messages
 while True:
     msg = input("> ")
 
     if msg.lower() == "!logout":
-        client.send(msg.encode())  # Logout an Server senden
+        client.send(msg.encode()) # Send logout to server
         time.sleep(1)
         client.close()
-        break # Beende die Eingabe-Schleife
+        break # End input loop and close client
 
     else:
-        client.send(msg.encode()) # Nachricht an Server senden
+        client.send(msg.encode()) # Send message to server
+
