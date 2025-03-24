@@ -2,6 +2,7 @@ import time
 import socket
 import threading
 import sys
+import base64
 from colorama import init, Fore
 
 init(autoreset=True)  # Ensures that colors are reset after each line
@@ -20,51 +21,52 @@ Server_Port = 12345
 def receive_messages(client_socket, username):
     while True:
         try:
-            msg = client_socket.recv(1024).decode() # Receive message from server
-            if msg:
-                if msg.startswith("Username already taken. "):
+            msg_encoded = client_socket.recv(1024)
+            msg_decoded = base64.b64decode(msg_encoded).decode()  # Decode message from server
+            if msg_decoded:
+                if msg_decoded.startswith("Username already taken. "):
                     continue
 
                 # Clears the current line and ensures the cursor is reset
                 sys.stdout.write("\r" + " " * 50 + "\r") # Clear line
                 sys.stdout.flush()
 
-                if msg.startswith(f"[Private "):
-                    print(Private_Messages_Color + msg) # Private message in magenta
+                if msg_decoded.startswith(f"[Private "):
+                    print(Private_Messages_Color + msg_decoded)  # Private Nachricht in Magenta
 
-                elif msg.startswith(f"[Server"):
-                    print(Server_Color + msg) # Server messages
+                elif msg_decoded.startswith(f"[Server"):
+                    print(Server_Color + msg_decoded)  # Server Nachrichten
 
-                elif msg.startswith(username + ":"):
-                    print(Own_Messages_Color + msg) # Own messages in green
+                elif msg_decoded.startswith(username + ":"):
+                    print(Own_Messages_Color + msg_decoded)  # Eigene Nachrichten in Grün
 
                 else:
-                    print(Other_Messages_Color + msg) # Messages from others in blue
+                    print(Other_Messages_Color + msg_decoded)  # Nachrichten von anderen in Blau
 
-                if "[Server] You have successfully logged out." in msg:
-                    break # End loop on logout message
+                if "[Server] You have successfully logged out." in msg_decoded:
+                    break  # Schleife bei Abmelde-Nachricht beenden
 
-                sys.stdout.write("> ") # Display input line again
+                sys.stdout.write("> ")  # Eingabezeile erneut anzeigen
                 sys.stdout.flush()
 
         except Exception as e:
-            print(Error_Color + "[CONNECTION TO SERVER LOST]") # Display connection loss
-            client_socket.close() # Close socket
+            print(Error_Color + "[CONNECTION TO SERVER LOST]")  # Verbindungsverlust anzeigen
+            client_socket.close()  # Socket schließen
             break
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((Server_Ip, Server_Port)) # Connect to server
+client.connect((Server_Ip, Server_Port))  # Connect to server
 
 # Receive message from server (enter username)
-print(client.recv(1024).decode(), end=" ")
-username = input()
-client.send(username.encode()) # Send username to server
+print(base64.b64decode(client.recv(1024)).decode(), end=" ")
+client_username = input()
+client.send(base64.b64encode(client_username.encode()))  # Send username to server
 
 # Receive welcome message
-print(Server_Color + client.recv(1024).decode())
+print(Server_Color + base64.b64decode(client.recv(1024)).decode())
 
 # Start thread for incoming messages
-thread = threading.Thread(target=receive_messages, args=(client, username))
+thread = threading.Thread(target=receive_messages, args=(client, client_username))
 thread.start()
 
 # Send messages
@@ -72,10 +74,10 @@ while True:
     msg = input("> ")
 
     if msg.lower() == "!logout":
-        client.send(msg.encode()) # Send logout to server
+        client.send(base64.b64encode(msg.encode()))  # Abmeldung an den Server senden
         time.sleep(1)
         client.close()
-        break # End input loop and close client
+        break  # Eingabeschleife beenden und Client schließen
 
     else:
-        client.send(msg.encode()) # Send message to server
+        client.send(base64.b64encode(msg.encode()))  # Nachricht an den Server senden
