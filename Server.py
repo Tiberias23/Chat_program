@@ -2,7 +2,8 @@ import socket
 import threading
 
 clients = {}  # Speichert {Socket: Benutzername}
-
+server_ip = "0.0.0.0"
+server_port = 12345
 
 def handle_client(client_socket, addr):
     print(f"[NEUE VERBINDUNG] {addr} verbunden.")
@@ -86,7 +87,7 @@ def handle_client(client_socket, addr):
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("0.0.0.0", 12345))
+server.bind((server_ip, server_port))
 server.listen(5) # Basically die Warteschlange für anfragen
 
 print("[SERVER] Wartet auf Verbindungen...")
