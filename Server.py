@@ -91,6 +91,7 @@ server.bind((server_ip, server_port))
 server.listen(5) # Basically die Warteschlange für anfragen
 
 print("[SERVER] Wartet auf Verbindungen...")
+print(f"[SERVER] Ip: {server_ip} Port: {server_port}")
 
 while True:
     client_socket, addr = server.accept()
