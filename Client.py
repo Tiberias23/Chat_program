@@ -49,7 +49,6 @@ def receive_messages(client_socket, username):
 
         except Exception as e:
             print(Error_Color + "[CONNECTION TO SERVER LOST]") # Display connection loss
-            client_socket.send(f"[Client Error] Client had error: {e}") # Send error to server
             client_socket.close() # Close socket
             break
 
@@ -80,4 +79,3 @@ while True:
 
     else:
         client.send(msg.encode()) # Send message to server
-

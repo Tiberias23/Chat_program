@@ -2,6 +2,8 @@ import socket
 import threading
 
 clients = {}  # Stores {Socket: Username}
+server_ip = "0.0.0.0"
+server_port = 12345
 
 def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
@@ -23,7 +25,7 @@ def handle_client(client_socket, addr):
     print(f"[LOGIN] {username} has connected.") # Display login
 
     # Send welcome message
-    client_socket.send(f"Welcome, {username}!".encode())
+    client_socket.send(f"Welcome, {username}! \n/help to see a list of commands".encode())
 
     while True:
         try:
@@ -31,8 +33,8 @@ def handle_client(client_socket, addr):
             if not msg:
                 break
 
-            # Logout command: If the user enters "!logout", they will be logged out
-            if msg.lower() == "!logout":
+            # Logout command: If the user enters "/logout", they will be logged out
+            if msg.lower() == "/logout":
                 client_socket.send("[Server] You have successfully logged out.".encode())
                 print(f"[LOGOUT] {username} has logged out.") # Display logout in Logs
 
@@ -46,7 +48,7 @@ def handle_client(client_socket, addr):
             if msg.lower() == "/online":
                 online_users = ", ".join(clients.values())
                 client_socket.send(f"Online users: {online_users}".encode())
-                break
+                continue
 
             # Private message: Check if the message starts with @username those won't be in the Logs
             if msg.startswith("@"):
@@ -63,6 +65,12 @@ def handle_client(client_socket, addr):
             # Error message: If a client has an error, try to send an error message to the server
             if msg.startswith("[Client Error]"):
                 print(f"{msg} Error From {username}")
+
+            if msg.lower() == "/help":
+                for client in clients:
+                    if client == client_socket:
+                        client_socket.send(
+                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode())
 
             else:
                 # Log open messages, not private messages
@@ -81,13 +89,12 @@ def handle_client(client_socket, addr):
     client_socket.close() # Close connection to client
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("0.0.0.0", 12345))
+server.bind((server_ip, server_port))
 server.listen(5) # Essentially the queue for requests
-
+print(f"[SERVER] Ip: {server_ip} Port: {server_port}")
 print("[SERVER] Waiting for connections...") # Display waiting for connections
 
 while True:
     client_socket, addr = server.accept()
     thread = threading.Thread(target=handle_client, args=(client_socket, addr))
     thread.start()
-
