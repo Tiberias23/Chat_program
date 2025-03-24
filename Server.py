@@ -23,7 +23,7 @@ def handle_client(client_socket, addr):
     print(f"[LOGIN] {username} hat sich verbunden.")
 
     # Begrüßungsnachricht senden
-    client_socket.send(f"Willkommen, {username}!".encode())
+    client_socket.send(f"Willkommen, {username} \n/help".encode())
 
     while True:
         try:
@@ -32,7 +32,7 @@ def handle_client(client_socket, addr):
                 break
 
             # Logout-Befehl: Wenn der Benutzer "!logout" eingibt, wird er abgemeldet
-            if msg.lower() == "!logout":
+            if msg.lower() == "/logout":
                 client_socket.send("[Server] Du hast dich erfolgreich abgemeldet.".encode())
                 print(f"[LOGOUT] {username} hat sich abgemeldet.")
 
@@ -46,7 +46,7 @@ def handle_client(client_socket, addr):
             if msg.lower() == "/online":
                 online_users = ", ".join(clients.values())
                 client_socket.send(f"Online Benutzer: {online_users}".encode())
-                break
+                continue
 
             # Private Nachricht: Prüfen, ob die Nachricht mit @Benutzername beginnt
             if msg.startswith("@"):
@@ -63,6 +63,12 @@ def handle_client(client_socket, addr):
             # Error Nachricht: Wenn ein Client einen Fehler hat, wird versucht eine Error Nachricht and den Server zu schicken
             if msg.startswith("[Client Error]"):
                 print(f"{msg} Error From {username}")
+
+            if msg.lower() == "/help":
+                for client in clients:
+                    if client == client_socket:
+                        client_socket.send(
+                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode())
 
             else:
                 print(f"[{username}] {msg}")

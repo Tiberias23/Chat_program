@@ -13,7 +13,7 @@ Eigene_Nachrichten_Farbe = Fore.GREEN
 Private_Nachrichten_Farbe = Fore.MAGENTA
 Andere_Nachrichten_Farbe = Fore.CYAN
 
-# This has to be the same as the stuff in Server.Binde() in the Server.py
+# This has to be the same as the stuff in Server. Binde() in the Server.py
 Server_Ip = "127.0.0.1"
 Server_Port = 12345
 
@@ -49,8 +49,6 @@ def receive_messages(client_socket, username):
 
         except Exception as e:
             print(Fehler_Farbe + "[VERBINDUNG ZUM SERVER VERLOREN]")
-            client_socket.send(f"[Client Error] Client had error: {e}")
-            client_socket.close()
             break
 
 
