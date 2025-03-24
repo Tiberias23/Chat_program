@@ -1,5 +1,6 @@
 import socket
 import threading
+import base64
 
 clients = {}  # Stores {Socket: Username}
 server_ip = "0.0.0.0"
@@ -9,15 +10,15 @@ def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
 
     # Receive username from client
-    client_socket.send("Enter your username:".encode())
-    username = client_socket.recv(1024).decode().strip()
+    client_socket.send(base64.b64encode("Enter your username:".encode()))
+    username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
     # Check if the username is unique, otherwise the user gets another chance to choose a unique username or the connection is closed
     if username in clients.values():
-        client_socket.send("Username already taken. Please choose another username:".encode())
-        username = client_socket.recv(1024).decode().strip()
+        client_socket.send(base64.b64encode("Username already taken. Please choose another username:".encode()))
+        username = base64.b64decode(client_socket.recv(1024)).decode().strip()
         if username in clients.values():
-            client_socket.send("Username already taken. Connection will be closed.".encode())
+            client_socket.send(base64.b64encode("Username already taken. Connection will be closed.".encode()))
             client_socket.close()
             return
 
@@ -25,29 +26,29 @@ def handle_client(client_socket, addr):
     print(f"[LOGIN] {username} has connected.") # Display login
 
     # Send welcome message
-    client_socket.send(f"Welcome, {username}! \n/help to see a list of commands".encode())
+    client_socket.send(base64.b64encode(f"Welcome, {username}! \n/help to see a list of commands".encode()))
 
     while True:
         try:
-            msg = client_socket.recv(1024).decode() # Receive message from client
+            msg = base64.b64decode(client_socket.recv(1024)).decode() # Decode message from client
             if not msg:
                 break
 
             # Logout command: If the user enters "/logout", they will be logged out
             if msg.lower() == "/logout":
-                client_socket.send("[Server] You have successfully logged out.".encode())
+                client_socket.send(base64.b64encode("[Server] You have successfully logged out.".encode()))
                 print(f"[LOGOUT] {username} has logged out.") # Display logout in Logs
 
                 # Send message to all clients
                 for client in clients:
                     if client != client_socket:
-                        client.send(f"[Server] {username} has logged out.".encode())
+                        client.send(base64.b64encode(f"[Server] {username} has logged out.".encode()))
                 break
 
             # Who is online
             if msg.lower() == "/online":
                 online_users = ", ".join(clients.values())
-                client_socket.send(f"Online users: {online_users}".encode())
+                client_socket.send(base64.b64encode(f"Online users: {online_users}".encode()))
                 continue
 
             # Private message: Check if the message starts with @username those won't be in the Logs
@@ -58,7 +59,7 @@ def handle_client(client_socket, addr):
                 # Send message only to the specified user
                 for client, name in clients.items():
                     if name == target_username:
-                        client.send(f"[Private from {username}]: {private_msg}".encode())
+                        client.send(base64.b64encode(f"[Private from {username}]: {private_msg}".encode()))
                         break
                 continue
 
@@ -69,8 +70,8 @@ def handle_client(client_socket, addr):
             if msg.lower() == "/help":
                 for client in clients:
                     if client == client_socket:
-                        client_socket.send(
-                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode())
+                        client_socket.send(base64.b64encode(
+                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode()))
 
             else:
                 # Log open messages, not private messages
@@ -79,7 +80,7 @@ def handle_client(client_socket, addr):
                 # Forward message to all other clients
                 for client in clients:
                     if client != client_socket:
-                        client.send(f"{username}: {msg}".encode())
+                        client.send(base64.b64encode(f"{username}: {msg}".encode()))
 
         except:
             break
