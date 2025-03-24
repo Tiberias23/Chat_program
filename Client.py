@@ -21,29 +21,29 @@ Server_Port = 12345
 def receive_messages(client_socket, username):
     while True:
         try:
-            msg = client_socket.recv(1024)
-            msg = base64.b64decode(msg).decode()  # Decode message from server
-            if msg:
-                if msg.startswith("Username already taken. "):
+            msg_encoded = client_socket.recv(1024)
+            msg_decoded = base64.b64decode(msg_encoded).decode()  # Decode message from server
+            if msg_decoded:
+                if msg_decoded.startswith("Username already taken. "):
                     continue
 
                 # Clears the current line and ensures the cursor is reset
                 sys.stdout.write("\r" + " " * 50 + "\r") # Clear line
                 sys.stdout.flush()
 
-                if msg.startswith(f"[Private "):
-                    print(Private_Messages_Color + msg)  # Private Nachricht in Magenta
+                if msg_decoded.startswith(f"[Private "):
+                    print(Private_Messages_Color + msg_decoded)  # Private Nachricht in Magenta
 
-                elif msg.startswith(f"[Server"):
-                    print(Server_Color + msg)  # Server Nachrichten
+                elif msg_decoded.startswith(f"[Server"):
+                    print(Server_Color + msg_decoded)  # Server Nachrichten
 
-                elif msg.startswith(username + ":"):
-                    print(Own_Messages_Color + msg)  # Eigene Nachrichten in Grün
+                elif msg_decoded.startswith(username + ":"):
+                    print(Own_Messages_Color + msg_decoded)  # Eigene Nachrichten in Grün
 
                 else:
-                    print(Other_Messages_Color + msg)  # Nachrichten von anderen in Blau
+                    print(Other_Messages_Color + msg_decoded)  # Nachrichten von anderen in Blau
 
-                if "[Server] You have successfully logged out." in msg:
+                if "[Server] You have successfully logged out." in msg_decoded:
                     break  # Schleife bei Abmelde-Nachricht beenden
 
                 sys.stdout.write("> ")  # Eingabezeile erneut anzeigen
@@ -59,14 +59,14 @@ client.connect((Server_Ip, Server_Port))  # Connect to server
 
 # Receive message from server (enter username)
 print(base64.b64decode(client.recv(1024)).decode(), end=" ")
-username = input()
-client.send(base64.b64encode(username.encode()))  # Send username to server
+client_username = input()
+client.send(base64.b64encode(client_username.encode()))  # Send username to server
 
 # Receive welcome message
 print(Server_Color + base64.b64decode(client.recv(1024)).decode())
 
 # Start thread for incoming messages
-thread = threading.Thread(target=receive_messages, args=(client, username))
+thread = threading.Thread(target=receive_messages, args=(client, client_username))
 thread.start()
 
 # Send messages
