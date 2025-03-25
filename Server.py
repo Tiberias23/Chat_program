@@ -6,6 +6,8 @@ clients = {}  # Stores {Socket: Username}
 server_ip = "0.0.0.0"
 server_port = 12345
 
+Verbotene_usernames: list[str] = []
+
 def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
 
@@ -13,14 +15,15 @@ def handle_client(client_socket, addr):
     client_socket.send(base64.b64encode("Enter your username:".encode()))
     username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
+    while username in Verbotene_usernames:
+        client_socket.send(base64.b64encode("Username is not allowed. Please Send a newone.".encode()))
+        username = base64.b64decode(client_socket.recv(1024)).decode().strip()
+
+
     # Check if the username is unique, otherwise the user gets another chance to choose a unique username or the connection is closed
-    if username in clients.values():
+    while username in clients.values():
         client_socket.send(base64.b64encode("Username already taken. Please choose another username:".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
-        if username in clients.values():
-            client_socket.send(base64.b64encode("Username already taken. Connection will be closed.".encode()))
-            client_socket.close()
-            return
 
     clients[client_socket] = username
     print(f"[LOGIN] {username} has connected.") # Display login

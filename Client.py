@@ -24,7 +24,7 @@ def receive_messages(client_socket, username):
             msg_encoded = client_socket.recv(1024)
             msg_decoded = base64.b64decode(msg_encoded).decode()  # Decode message from server
             if msg_decoded:
-                if msg_decoded.startswith("Username already taken. "):
+                if msg_decoded.startswith("Username already taken. ") or msg_decoded.startswith("Username is not allowed. "):
                     continue
 
                 # Clears the current line and ensures the cursor is reset
@@ -44,7 +44,7 @@ def receive_messages(client_socket, username):
                     print(Other_Messages_Color + msg_decoded)  # Nachrichten von anderen in Blau
 
                 if "[Server] You have successfully logged out." != msg_decoded:
-                    sys.stdout.write("2> ")  # Eingabezeile erneut anzeigen
+                    sys.stdout.write("> ")  # Eingabezeile erneut anzeigen
                     sys.stdout.flush()
                 else:
                     break  # Schleife beenden, wenn der Client abgemeldet wurde
@@ -72,7 +72,7 @@ thread.start()
 
 # Send messages
 while True:
-    msg = input("1> ")
+    msg = input("> ")
 
     if msg.lower() == "/logout":
         client.send(base64.b64encode(msg.encode()))  # Abmeldung an den Server senden
