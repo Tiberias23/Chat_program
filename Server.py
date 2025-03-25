@@ -74,9 +74,6 @@ def handle_client(client_socket, addr):
                         "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode()))
 
             else:
-                # Log open messages, not private messages
-                print(f"[{username}] {msg}")
-
                 # Forward message to all other clients
                 for client in clients:
                     if client != client_socket:
