@@ -34,6 +34,13 @@ def handle_client(client_socket, addr):
             if not msg:
                 break
 
+            # Help command: for list of all commands and help with private messages
+            if msg.lower() == "/help":
+                for client in clients:
+                    if client == client_socket:
+                        client_socket.send(base64.b64encode(
+                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode()))
+
             # Logout command: If the user enters "/logout", they will be logged out
             if msg.lower() == "/logout":
                 client_socket.send(base64.b64encode("[Server] You have successfully logged out.".encode()))
@@ -66,12 +73,6 @@ def handle_client(client_socket, addr):
             # Error message: If a client has an error, try to send an error message to the server
             if msg.startswith("[Client Error]"):
                 print(f"{msg} Error From {username}")
-
-            if msg.lower() == "/help":
-                for client in clients:
-                    if client == client_socket:
-                        client_socket.send(base64.b64encode(
-                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode()))
 
             else:
                 # Forward message to all other clients
