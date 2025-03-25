@@ -1,4 +1,3 @@
-import time
 import socket
 import threading
 import sys
@@ -49,7 +48,7 @@ def receive_messages(client_socket, username):
                 else:
                     break  # Schleife beenden, wenn der Client abgemeldet wurde
 
-        except Exception as e:
+        except:
             print(Error_Color + "[CONNECTION TO SERVER LOST]")  # Verbindungsverlust anzeigen
             client_socket.close()  # Socket schließen
             break

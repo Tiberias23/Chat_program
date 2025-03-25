@@ -6,7 +6,7 @@ clients = {}  # Stores {Socket: Username}
 server_ip = "0.0.0.0"
 server_port = 12345
 
-Verbotene_usernames: list[str] = []
+Unallowed_usernames: list[str] = ["Kek"]
 
 def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
@@ -15,8 +15,8 @@ def handle_client(client_socket, addr):
     client_socket.send(base64.b64encode("Enter your username:".encode()))
     username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
-    while username in Verbotene_usernames:
-        client_socket.send(base64.b64encode("Username is not allowed. Please Send a newone.".encode()))
+    while username in Unallowed_usernames:
+        client_socket.send(base64.b64encode(f"Username is not allowed. Please Send a newone.\nUnalowed usernammes {Unallowed_usernames}".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
 
@@ -29,7 +29,7 @@ def handle_client(client_socket, addr):
     print(f"[LOGIN] {username} has connected.") # Display login
 
     # Send welcome message
-    client_socket.send(base64.b64encode(f"Welcome, {username}! \n/help to see a list of commands".encode()))
+    client_socket.send(base64.b64encode(f"[Server]Welcome, {username}! \n/help to see a list of commands".encode()))
 
     while True:
         try:
