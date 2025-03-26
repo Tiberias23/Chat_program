@@ -15,6 +15,7 @@ def handle_client(client_socket, addr):
     client_socket.send(base64.b64encode("Enter your username:".encode()))
     username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
+    # Check if the username is allowed
     while username.lower() in Unallowed_usernames:
         if not username.isprintable():
             client_socket.send(base64.b64encode("[Server] Username contains non-printable characters.".encode()))
@@ -104,7 +105,6 @@ def handle_client(client_socket, addr):
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((server_ip, server_port))
 server.listen(5) # Essentially the queue for requests
-print(f"[SERVER] Ip: {server_ip} Port: {server_port}")
 print("[SERVER] Waiting for connections...") # Display waiting for connections
 
 while True:
