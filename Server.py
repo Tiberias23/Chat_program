@@ -39,6 +39,7 @@ def handle_client(client_socket, addr):
 
             if not msg.isprintable():
                 client_socket.send(base64.b64encode("Message contains non printable charecters".encode()))
+                continue
 
             # Help command: for list of all commands and help with private messages
             if msg.lower() == "/help":
