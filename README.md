@@ -3,7 +3,7 @@
 
 ## Overview
 
-This project is a simple chat program that allows users to communicate with each other in real-time. It uses Python and various libraries to implement the functionality but most of it is with the socked library.
+This project is a simple chat program that allows users to communicate with each other in real-time. It uses Python and various libraries to implement the functionality.
 
 ## Features
 
@@ -11,6 +11,34 @@ This project is a simple chat program that allows users to communicate with each
 - Private messages
 - Group chat
 - Message encoding with Base64
+
+## What it doesnt have
+
+- User authentication
+- Message encryption
+- File sharing
+- Message history
+- User status
+- User profile
+- User blocking
+- User banning
+- User roles
+- User permissions
+- User registration
+- User login
+- User management
+- User search
+- User notifications
+- User settings
+- User preferences (except you change the code)
+- User interface (except you use the gui version)
+- User feedback
+- User support
+- documentation
+
+I know that this is a lot of features that are missing but this project is just a simple chat program that 
+I made to learn more about networking and python, and it's in early Development.
+(that's also why this readme is so bad, and it doesn't have a license) (and this is something like a todo list)
 
 ## Installation
 
