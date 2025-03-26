@@ -38,6 +38,10 @@ This project is a simple chat program that allows users to communicate with each
     python client.py
     ```
 
+if you need a Gui version of the client you can use the client_gui.py file instead of the client.py file in the other branch.
+
+if you want to run the client on a different machine you need to change the host variable in the client.py file to the ip address of the server machine bevor running it.
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request with your changes.

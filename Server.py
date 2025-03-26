@@ -7,7 +7,7 @@ server_ip = "0.0.0.0"
 server_port = 12345
 
 # If the user tries to enter a username that is in the list, the server will ask the user to enter a new one
-Unallowed_usernames: list[str] = ["kek"]
+Unallowed_usernames: list[str] = []
 
 def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
