@@ -6,6 +6,7 @@ clients = {}  # Stores {Socket: Username}
 server_ip = "0.0.0.0"
 server_port = 12345
 
+# If the user tries to enter a username that is in the list, the server will ask the user to enter a new one
 Unallowed_usernames: list[str] = ["kek"]
 
 def handle_client(client_socket, addr):
@@ -19,6 +20,8 @@ def handle_client(client_socket, addr):
     while username.lower() in Unallowed_usernames:
         if not username.isprintable():
             client_socket.send(base64.b64encode("[Server] Username contains non-printable characters.".encode()))
+            continue
+
         client_socket.send(base64.b64encode(f"[Server] Username is not allowed. Please Send a newone.\n"
                                             f"Unalowed usernammes {Unallowed_usernames}".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
