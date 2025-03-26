@@ -37,6 +37,11 @@ def handle_client(client_socket, addr):
             if not msg:
                 break
 
+            if not msg.isprintable():
+                client_socket.send(
+                    base64.b64encode(f"[Server] Your Massage contains non pritable Characters".encode()))
+                continue
+
             # Help command: for list of all commands and help with private messages
             if msg.lower() == "/help":
                 for client in clients:
