@@ -99,11 +99,12 @@ class ChatClient:
                 if msg_decoded.startswith("[Private"):
                     self.chat_display.insert(tk.END, msg_decoded + "\n", "private")
 
-                elif msg_decoded.startswith("[Server"):
+                elif msg_decoded.startswith("[Server]"):
                     self.chat_display.insert(tk.END, msg_decoded + "\n", "server")
 
                 else:
                     self.chat_display.insert(tk.END, msg_decoded + "\n", "other")
+
                 self.chat_display.config(state='disabled')
                 self.chat_display.yview(tk.END)
             except:
@@ -113,15 +114,20 @@ class ChatClient:
         # Send a message to the server
         msg = self.msg_entry.get()
         if msg:
-            # Display the send message in the chat window with "You:" prefix in "Courier New" font
-            self.chat_display.config(state='normal')
-            self.chat_display.insert(tk.END, f"You: {msg}\n", "user")
-            self.chat_display.config(state='disabled')
-            self.chat_display.yview(tk.END)
+            if msg.isprintable():
+                # Display the send message in the chat window with "You:" prefix in "Courier New" font
+                self.chat_display.config(state='normal')
+                self.chat_display.insert(tk.END, f"You: {msg}\n", "user")
+                self.chat_display.config(state='disabled')
+                self.chat_display.yview(tk.END)
 
-            # Send the message to the server
-            self.client_socket.send(base64.b64encode(msg.encode()))
-            self.msg_entry.delete(0, tk.END)
+                # Send the message to the server
+                self.client_socket.send(base64.b64encode(msg.encode()))
+                self.msg_entry.delete(0, tk.END)
+
+            else:
+                self.chat_display.config(state='normal')
+                self.chat_display.insert(tk.END, "message contains not printable objekts", "private")
 
         if msg.lower() == "/logout":
             self.client_socket.close()
