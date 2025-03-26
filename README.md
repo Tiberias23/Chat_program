@@ -42,10 +42,6 @@ This project is a simple chat program that allows users to communicate with each
 
 Contributions are welcome! Please fork the repository and submit a pull request with your changes.
 
-## License
-
-This project is licensed under the MIT License. For more details, see the `LICENSE` file.
-
 ## Contact
 
 If you have any questions or suggestions, please open an issue with the tag question.
