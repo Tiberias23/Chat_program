@@ -6,7 +6,7 @@ clients = {}  # Stores {Socket: Username}
 server_ip = "0.0.0.0"
 server_port = 12345
 
-Unallowed_usernames: list[str] = ["kek"]
+Unallowed_usernames: list[str] = ["kek", ""]
 
 def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
