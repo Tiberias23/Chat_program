@@ -6,7 +6,7 @@ clients = {}  # Stores {Socket: Username}
 server_ip = "0.0.0.0"
 server_port = 12345
 
-Unallowed_usernames: list[str] = ["Kek"]
+Unallowed_usernames: list[str] = ["kek"]
 
 def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
@@ -15,21 +15,24 @@ def handle_client(client_socket, addr):
     client_socket.send(base64.b64encode("Enter your username:".encode()))
     username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
-    while username in Unallowed_usernames:
-        client_socket.send(base64.b64encode(f"Username is not allowed. Please Send a newone.\nUnalowed usernammes {Unallowed_usernames}".encode()))
+    while username.lower() in Unallowed_usernames:
+        if not username.isprintable():
+            client_socket.send(base64.b64encode("[Server] Username contains non-printable characters.".encode()))
+        client_socket.send(base64.b64encode(f"[Server] Username is not allowed. Please Send a newone.\n"
+                                            f"Unalowed usernammes {Unallowed_usernames}".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
 
     # Check if the username is unique, otherwise the user gets another chance to choose a unique username or the connection is closed
     while username in clients.values():
-        client_socket.send(base64.b64encode("Username already taken. Please choose another username:".encode()))
+        client_socket.send(base64.b64encode("[Server] Username already taken. Please choose another username:".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
     clients[client_socket] = username
     print(f"[LOGIN] {username} has connected.") # Display login
 
     # Send welcome message
-    client_socket.send(base64.b64encode(f"[Server]Welcome, {username}! \n/help to see a list of commands".encode()))
+    client_socket.send(base64.b64encode(f"[Server] Welcome, {username}! \n/help to see a list of commands".encode()))
 
     while True:
         try:
@@ -37,12 +40,20 @@ def handle_client(client_socket, addr):
             if not msg:
                 break
 
+            if not msg.isprintable():
+                client_socket.send(base64.b64encode("[Client Error] Message contains non-printable characters.".encode()))
+                continue
+
             # Help command: for list of all commands and help with private messages
             if msg.lower() == "/help":
                 for client in clients:
                     if client == client_socket:
                         client_socket.send(base64.b64encode(
-                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode()))
+                        "[Server]\n "
+                        "/help shows this view\n "
+                        "/logout logs you out\n "
+                        "/online shows who is online\n "
+                        "@[username] sends a Private Message".encode()))
 
             # Logout command: If the user enters "/logout", they will be logged out
             if msg.lower() == "/logout":
@@ -97,6 +108,6 @@ print(f"[SERVER] Ip: {server_ip} Port: {server_port}")
 print("[SERVER] Waiting for connections...") # Display waiting for connections
 
 while True:
-    client_socket, addr = server.accept()
-    thread = threading.Thread(target=handle_client, args=(client_socket, addr))
+    socket_client, address = server.accept()
+    thread = threading.Thread(target= handle_client, args= (socket_client, address))
     thread.start()

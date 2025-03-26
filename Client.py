@@ -23,7 +23,7 @@ def receive_messages(client_socket, username):
             msg_encoded = client_socket.recv(1024)
             msg_decoded = base64.b64decode(msg_encoded).decode()  # Decode message from server
             if msg_decoded:
-                if msg_decoded.startswith("Username already taken. ") or msg_decoded.startswith("Username is not allowed. "):
+                if msg_decoded.startswith("[Server] Username already taken. ") or msg_decoded.startswith("[Server] Username is not allowed.") or msg_decoded.startswith("[Server] Username contains non-printable characters."):
                     continue
 
                 # Clears the current line and ensures the cursor is reset
