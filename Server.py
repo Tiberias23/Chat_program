@@ -42,7 +42,8 @@ def handle_client(client_socket, addr):
                 for client in clients:
                     if client == client_socket:
                         client_socket.send(base64.b64encode(
-                        "[Server]\n /help shows this view\n /logout logs you out\n /online shows who is online\n @[username] sends a Private Message".encode()))
+                        "[Server]\n /help shows this view\n /logout logs you out\n "
+                        "/online shows who is online\n @[username] sends a Private Message".encode()))
 
             # Logout command: If the user enters "/logout", they will be logged out
             if msg.lower() == "/logout":
