@@ -97,7 +97,6 @@ def handle_client(client_socket, addr):
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((server_ip, server_port))
 server.listen(5) # Essentially the queue for requests
-print(f"[SERVER] Ip: {server_ip} Port: {server_port}")
 print("[SERVER] Waiting for connections...") # Display waiting for connections
 
 while True:
