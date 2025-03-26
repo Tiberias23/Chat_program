@@ -17,12 +17,12 @@ def handle_client(client_socket, addr):
 
     # Check if the username is allowed
     while username.lower() in Unallowed_usernames:
-        client_socket.send(base64.b64encode(f"Username is not allowed. Please Send a newone.\nUnalowed usernammes {Unallowed_usernames}".encode()))
+        client_socket.send(base64.b64encode(f"[Server] Username is not allowed. Please Send a newone.\nUnalowed usernammes {Unallowed_usernames}".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
     # Check if the username is unique, otherwise the user gets another chance to choose a unique username
     while username in clients.values():
-        client_socket.send(base64.b64encode("Username already taken. Please choose another username:".encode()))
+        client_socket.send(base64.b64encode("[Server] Username already taken. Please choose another username:".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
     clients[client_socket] = username
@@ -36,6 +36,11 @@ def handle_client(client_socket, addr):
             msg = base64.b64decode(client_socket.recv(1024)).decode() # Decode message from client
             if not msg:
                 break
+
+            if not msg.isprintable():
+                client_socket.send(
+                    base64.b64encode(f"[Server] Your Massage contains non pritable Characters".encode()))
+                continue
 
             # Help command: for list of all commands and help with private messages
             if msg.lower() == "/help":
