@@ -1,4 +1,3 @@
-
 # Chat Program
 
 ## Overview
@@ -68,7 +67,9 @@ I made to learn more about networking and python, and it's in early Development.
 
 if you need a Gui version of the client you can use the client_gui.py file instead of the client.py file in the other branch.
 
-if you want to run the client on a different machine you need to change the host variable in the client.py file to the ip address of the server machine bevor running it.
+if you want to run the client on a different machine you need to change the host variable in the client.py file to the ip address of the server machine be for running it.
+
+if you want to make your own client you have to encode end decode your Message with Base64
 
 ## Contributing
 

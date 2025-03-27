@@ -1,3 +1,4 @@
+import atexit
 import socket
 import threading
 import sys
@@ -16,6 +17,12 @@ Other_Messages_Color = Fore.CYAN
 # This must match the settings in Server.bind() in Server.py
 Server_Ip = "127.0.0.1"
 Server_Port = 12345
+
+@atexit.register
+def emergency_exit():
+    print("Emergency exit is used")
+    client.close()
+
 
 def receive_messages(client_socket, username):
     while True:

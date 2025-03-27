@@ -2,6 +2,7 @@ import socket
 import threading
 import base64
 
+
 clients = {}  # Stores {Socket: Username}
 server_ip = "0.0.0.0"
 server_port = 12345
@@ -11,26 +12,41 @@ Unallowed_usernames: list[str] = []
 
 def handle_client(client_socket, addr):
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
+    username = ""
 
-    # Receive username from client
-    client_socket.send(base64.b64encode("Enter your username:".encode()))
-    username = base64.b64decode(client_socket.recv(1024)).decode().strip()
+    while username == "":
+        try:
+            # Receive username from client
+            client_socket.send(base64.b64encode("Enter your username:".encode()))
+            username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
-    # Check if the username is allowed
-    while username.lower() in Unallowed_usernames:
-        if not username.isprintable():
-            client_socket.send(base64.b64encode("[Server] Username contains non-printable characters.".encode()))
-            continue
+            if not username.lower().isprintable():
+                client_socket.send(base64.b64encode("Usernames cant inlcud not printable characters".encode()))
+                username = ""
 
-        client_socket.send(base64.b64encode(f"[Server] Username is not allowed. Please Send a newone.\n"
-                                            f"Unalowed usernammes {Unallowed_usernames}".encode()))
-        username = base64.b64decode(client_socket.recv(1024)).decode().strip()
+            if len(username) > 20:
+                client_socket.send(base64.b64encode("Username is to long".encode()))
+                username = ""
+
+        except base64.binascii.Error:
+            client_socket.send(base64.b64encode("You have to encode your massage in base64".encode()))
+            username = ""
+
+        # Check if the username is allowed
+        while username.lower() in Unallowed_usernames:
+            if not username.isprintable():
+                client_socket.send(base64.b64encode("[Server] Username contains non-printable characters.".encode()))
+                continue
+
+            client_socket.send(base64.b64encode(f"[Server] Username is not allowed. Please Send a newone.\n"
+                                                f"Unalowed usernammes {Unallowed_usernames}".encode()))
+            username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
 
-    # Check if the username is unique, otherwise the user gets another chance to choose a unique username or the connection is closed
-    while username in clients.values():
-        client_socket.send(base64.b64encode("[Server] Username already taken. Please choose another username:".encode()))
-        username = base64.b64decode(client_socket.recv(1024)).decode().strip()
+        # Check if the username is unique, otherwise the user gets another chance to choose a unique username or the connection is closed
+        while username in clients.values():
+            client_socket.send(base64.b64encode("[Server] Username already taken. Please choose another username:".encode()))
+            username = base64.b64decode(client_socket.recv(1024)).decode().strip()
 
     clients[client_socket] = username
     print(f"[LOGIN] {username} has connected.") # Display login
