@@ -3,12 +3,11 @@ import threading
 import base64
 import binascii
 
-clients: dict[str] = {}  # Stores {Socket: Username}
 server_ip: str = "0.0.0.0"
 server_port: int = 12345
 
 # If the user tries to enter a username that is in the list, the server will ask the user to enter a new one
-Unallowed_usernames: list[str] = []
+Unallowed_usernames: list[str] = [] # Unallowed usernames edit it like this: Unallowed_usernames = ["admin", "root", "test"]
 
 def handle_login(client_socket) -> None:
     username = ""
@@ -139,7 +138,12 @@ server.bind((server_ip, server_port))
 server.listen(5)  # Essentially the queue for requests
 print("[SERVER] Waiting for connections...")  # Display waiting for connections
 
-while True:
-    socket_client, address = server.accept()
-    thread = threading.Thread(target=handle_client, args=(socket_client, address), daemon=True)
-    thread.start()
+def main() -> None:
+
+    while True:
+        socket_client, address = server.accept()
+        thread = threading.Thread(target=handle_client, args=(socket_client, address), daemon=True)
+        thread.start()
+
+if __name__ == "__main__":
+    main()  # Start the server
