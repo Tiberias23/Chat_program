@@ -2,12 +2,17 @@ import socket
 import threading
 import base64
 import binascii
+import re
 
 server_ip: str = "0.0.0.0"
 server_port: int = 12345
+clients: dict[socket.socket, str] = {}  # Maps client sockets to usernames
 
 # If the user tries to enter a username that is in the list, the server will ask the user to enter a new one
-Unallowed_usernames: list[str] = [] # Unallowed usernames edit it like this: Unallowed_usernames = ["admin", "root", "test"]
+Unallowed_usernames: list[str] = [] # Ensure all are lowercase
+
+# Define a regex pattern for escape sequences
+ESCAPE_SEQUENCE_PATTERN = re.compile(r'\x1b\[[0-9;=]*[a-zA-Z]')
 
 def handle_login(client_socket) -> None:
     username = ""
@@ -40,6 +45,9 @@ def handle_login(client_socket) -> None:
     while username in clients.values():
         client_socket.send(base64.b64encode("[Server] Username already taken. Please choose another username:".encode()))
         username = base64.b64decode(client_socket.recv(1024)).decode().strip()
+
+    clients[client_socket] = username
+
 
 def handle_command(client_socket, username, msg) -> None:
     """
@@ -87,8 +95,11 @@ def handle_command(client_socket, username, msg) -> None:
     # If the command is not recognized
     client_socket.send(base64.b64encode("[Server] Unknown command. Type /help for a list of commands.".encode()))
 
+
 def handle_client(client_socket, addr) -> None:
+
     """Handles the client connection."""
+
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
 
     try:
@@ -106,10 +117,12 @@ def handle_client(client_socket, addr) -> None:
                 if not msg:
                     break
 
-                if not msg.isprintable():
-                    client_socket.send(base64.b64encode("[Client Error] Message contains non-printable characters.".encode()))
+                # Check for escape sequences using regex
+                if ESCAPE_SEQUENCE_PATTERN.search(msg):
+                    client_socket.send(base64.b64encode("[Client Error] Message contains invalid escape sequences.".encode()))
                     continue
 
+                # Check if the message is a command
                 if msg.startswith("/") or msg.startswith("@"):  # Check if the message is a command
                     handle_command(client_socket, username, msg)
                     continue
@@ -122,6 +135,7 @@ def handle_client(client_socket, addr) -> None:
             except (binascii.Error, UnicodeDecodeError):
                 client_socket.send(base64.b64encode("[Server] Invalid message format.".encode()))
             except ConnectionResetError:
+                print(f"[DISCONNECT] {addr} disconnected unexpectedly.")
                 break
 
     except Exception as e:
@@ -133,17 +147,26 @@ def handle_client(client_socket, addr) -> None:
             del clients[client_socket]
         client_socket.close()  # Close connection to client
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((server_ip, server_port))
-server.listen(5)  # The queue for requests
-print("[SERVER] Waiting for connections...")  # Display waiting for connections
 
 def main() -> None:
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((server_ip, server_port))
+    server.listen(5)  # The queue for requests
+    print("[SERVER] Waiting for connections...")  # Display waiting for connections
 
-    while True:
-        socket_client, address = server.accept()
-        thread = threading.Thread(target=handle_client, args=(socket_client, address), daemon=True)
-        thread.start()
+    try:
+        while True:
+            socket_client, address = server.accept()
+            thread = threading.Thread(target=handle_client, args=(socket_client, address), daemon=True)
+            thread.start()
+    
+    except KeyboardInterrupt:
+        print("\n[SERVER] Shutting down...")
+    
+    finally:
+        server.close()
+        print("[SERVER] Socket closed.")
+
 
 if __name__ == "__main__":
     main()  # Start the server
