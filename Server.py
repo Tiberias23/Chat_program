@@ -135,7 +135,7 @@ def handle_client(client_socket, addr) -> None:
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((server_ip, server_port))
-server.listen(5)  # Essentially the queue for requests
+server.listen(5)  # The queue for requests
 print("[SERVER] Waiting for connections...")  # Display waiting for connections
 
 def main() -> None:
