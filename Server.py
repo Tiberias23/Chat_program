@@ -3,19 +3,21 @@ import threading
 import base64
 import binascii
 import re
+from typing import Dict, List, Tuple
 
 server_ip: str = "0.0.0.0"
 server_port: int = 12345
-clients: dict[socket.socket, str] = {}  # Maps client sockets to usernames
+clients: Dict[socket.socket, str] = {}  # Maps client sockets to usernames
 
 # If the user tries to enter a username that is in the list, the server will ask the user to enter a new one
-Unallowed_usernames: list[str] = [] # Ensure all are lowercase
+Unallowed_usernames: List[str] = []  # Ensure all are lowercase
 
 # Define a regex pattern for escape sequences
-ESCAPE_SEQUENCE_PATTERN = re.compile(r'\x1b\[[0-9;=]*[a-zA-Z]')
+ESCAPE_SEQUENCE_PATTERN: re.Pattern = re.compile(r'\x1b\[[0-9;=]*[a-zA-Z]')
 
-def handle_login(client_socket) -> None:
-    username = ""
+
+def handle_login(client_socket: socket.socket) -> None:
+    username: str = ""
 
     while username == "":
         try:
@@ -49,7 +51,7 @@ def handle_login(client_socket) -> None:
     clients[client_socket] = username
 
 
-def handle_command(client_socket, username, msg) -> None:
+def handle_command(client_socket: socket.socket, username: str, msg: str) -> None:
     """
     Handles commands sent by the client.
     """
@@ -73,15 +75,15 @@ def handle_command(client_socket, username, msg) -> None:
         raise ConnectionResetError  # Force disconnection after logout
 
     if msg.lower() == "/online":
-        online_users = ", ".join(clients.values())
+        online_users: str = ", ".join(clients.values())
         client_socket.send(base64.b64encode(f"Online users: {online_users}".encode()))
         return
 
     if msg.startswith("@"):
-        target_username = msg.split(" ")[0][1:]  # Username after @
-        private_msg = " ".join(msg.split(" ")[1:])  # Text of the message
+        target_username: str = msg.split(" ")[0][1:]  # Username after @
+        private_msg: str = " ".join(msg.split(" ")[1:])  # Text of the message
 
-        user_is_reachable = False
+        user_is_reachable: bool = False
         for client, name in clients.items():
             if name == target_username:
                 client.send(base64.b64encode(f"[Private from {username}]: {private_msg}".encode()))
@@ -96,15 +98,14 @@ def handle_command(client_socket, username, msg) -> None:
     client_socket.send(base64.b64encode("[Server] Unknown command. Type /help for a list of commands.".encode()))
 
 
-def handle_client(client_socket, addr) -> None:
-
+def handle_client(client_socket: socket.socket, addr: Tuple[str, int]) -> None:
     """Handles the client connection."""
 
     print(f"[NEW CONNECTION] {addr} connected.")  # Display new connection
 
     try:
         handle_login(client_socket)  # Handle login for the client
-        username = clients.get(client_socket)  # Get the username of the client
+        username: str = clients.get(client_socket, "")  # Get the username of the client
 
         print(f"[LOGIN] {username} has connected.")  # Display login
 
@@ -113,7 +114,7 @@ def handle_client(client_socket, addr) -> None:
 
         while True:
             try:
-                msg = base64.b64decode(client_socket.recv(1024)).decode()  # Decode message from client
+                msg: str = base64.b64decode(client_socket.recv(1024)).decode()  # Decode message from client
                 if not msg:
                     break
 
@@ -134,6 +135,7 @@ def handle_client(client_socket, addr) -> None:
 
             except (binascii.Error, UnicodeDecodeError):
                 client_socket.send(base64.b64encode("[Server] Invalid message format.".encode()))
+
             except ConnectionResetError:
                 print(f"[DISCONNECT] {addr} disconnected unexpectedly.")
                 break
@@ -149,7 +151,7 @@ def handle_client(client_socket, addr) -> None:
 
 
 def main() -> None:
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((server_ip, server_port))
     server.listen(5)  # The queue for requests
     print("[SERVER] Waiting for connections...")  # Display waiting for connections
@@ -157,7 +159,7 @@ def main() -> None:
     try:
         while True:
             socket_client, address = server.accept()
-            thread = threading.Thread(target=handle_client, args=(socket_client, address), daemon=True)
+            thread: threading.Thread = threading.Thread(target=handle_client, args=(socket_client, address), daemon=True)
             thread.start()
     
     except KeyboardInterrupt:
