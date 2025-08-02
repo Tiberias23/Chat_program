@@ -15,8 +15,8 @@ Private_Messages_Color = Fore.MAGENTA
 Other_Messages_Color = Fore.CYAN
 
 # This must match the settings in Server.bind() in Server.py
-Server_Ip = "127.0.0.1"
-Server_Port = 12345
+SERVER_IP = "127.0.0.1"
+SERVER_PORT = 12345
 
 @atexit.register
 def emergency_exit():
@@ -62,7 +62,7 @@ def receive_messages(client_socket, username):
     return
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((Server_Ip, Server_Port))  # Connect to server
+client.connect((SERVER_IP, SERVER_PORT))  # Connect to server
 
 # Receive message from server (enter username)
 print(base64.b64decode(client.recv(1024)).decode(), end=" ")

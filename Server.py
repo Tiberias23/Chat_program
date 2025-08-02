@@ -5,15 +5,15 @@ import binascii
 import re
 from typing import Dict, List, Tuple
 
-server_ip: str = "0.0.0.0"
-server_port: int = 12345
-clients: Dict[socket.socket, str] = {}  # Maps client sockets to usernames
+# Define a regex pattern for escape sequences
+ESCAPE_SEQUENCE_PATTERN: re.Pattern = re.compile(r'\x1b\[[0-9;=]*[a-zA-Z]')
+
+SERVER_IP: str = "0.0.0.0"
+SERVER_PORT: int = 12345
 
 # If the user tries to enter a username that is in the list, the server will ask the user to enter a new one
 Unallowed_usernames: List[str] = []  # Ensure all are lowercase
-
-# Define a regex pattern for escape sequences
-ESCAPE_SEQUENCE_PATTERN: re.Pattern = re.compile(r'\x1b\[[0-9;=]*[a-zA-Z]')
+clients: Dict[socket.socket, str] = {}  # Maps client sockets to usernames
 
 
 def handle_login(client_socket: socket.socket) -> None:
@@ -152,7 +152,7 @@ def handle_client(client_socket: socket.socket, addr: Tuple[str, int]) -> None:
 
 def main() -> None:
     server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((server_ip, server_port))
+    server.bind((SERVER_IP, SERVER_PORT))
     server.listen(5)  # The queue for requests
     print("[SERVER] Waiting for connections...")  # Display waiting for connections
 
